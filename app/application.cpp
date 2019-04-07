@@ -1,29 +1,51 @@
-#include <user_config.h>
-#include <SmingCore/SmingCore.h>
 #include <SmingCore/Debug.h>
+#include <SmingCore/SmingCore.h>
+#include <application.h>
+#include <user_config.h>
+#include "SerialReadingDelegateDemo.h"
+//#include "Services/CommandProcessing/CommandProcessingIncludes.h"
 
-Timer fsTimer;
+SerialReadingDelegateDemo delegateDemoClass;
 
-void saveFile() {
-	String fileName = "testFile";
-	String fileContents = "Some sample text. Let's make it a little bit longer.";
-	fileSetContent( fileName, fileContents );
-	debugf("Writing data to spiffs\r\n");
-}
+String fileName = "test123456";
+String fileContents = "0123456789";
 
 void init()
 {
-	Serial.begin(SERIAL_BAUD_RATE); // 115200 by default
+	Serial.begin(SERIAL_BAUD_RATE, SERIAL_8N1, SERIAL_FULL);
+	Debug.setDebug(Serial);
 	Serial.systemDebugOutput(true); // Enable debug output to serial
 	Serial.commandProcessing(true);
-
-	Debug.setDebug(Serial);
-	Debug.initCommand();
-	Debug.start();
-	Debug.printf("This is the debug output\r\n");
 
 	debugf("trying to mount spiffs at 0x%08x, length %d", 0x100000, SPIFF_SIZE);
 	spiffs_mount_manual(0x100000, SPIFF_SIZE);
 
-	fsTimer.initializeMs(1000 , saveFile ).start();
+	delegateDemoClass.begin(Serial);
+	delegateDemoClass.onCommand(handleCommand);
+
+}
+
+void saveFile(int iterations = 0)
+{
+	int bytes = 0;
+	int i;
+	for(i = 0; i < iterations; i++) {
+		bytes += fileSetContent(fileName, fileContents);
+		debugf("Bytes written to fs: %d", bytes);
+	}
+}
+
+void handleCommand(const String& command)
+{
+	String first = command.substring(0, 4);
+	String second = command.substring(5,10);
+	Serial.printf( "Full cmd is: %s\r\n" , command.c_str());
+	Serial.printf( "Cmd1: %s, cmd2: %s\r\n" , first.c_str() , second.c_str() );
+	if(first.equalsIgnoreCase(_F("save"))) {
+		if(second.toInt() > 0) {
+			saveFile(second.toInt());
+		}
+	} else {
+		//Serial.printf(_F("Try typing: save [N] - [N] is integer\r\n"));
+	}
 }
