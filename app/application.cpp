@@ -10,6 +10,12 @@ SerialReadingDelegateDemo delegateDemoClass;
 String fileName = "test123456";
 String fileContents = "0123456789";
 
+Timer fsTimer;
+
+void delayedMount() {
+	debugf("trying to mount spiffs at 0x%08x, length %d", 0x100000, SPIFF_SIZE);
+	spiffs_mount_manual(0x100000, SPIFF_SIZE);
+}
 void init()
 {
 	Serial.begin(SERIAL_BAUD_RATE, SERIAL_8N1, SERIAL_FULL);
@@ -17,11 +23,10 @@ void init()
 	Serial.systemDebugOutput(true); // Enable debug output to serial
 	Serial.commandProcessing(true);
 
-	debugf("trying to mount spiffs at 0x%08x, length %d", 0x100000, SPIFF_SIZE);
-	spiffs_mount_manual(0x100000, SPIFF_SIZE);
-
 	delegateDemoClass.begin(Serial);
 	delegateDemoClass.onCommand(handleCommand);
+
+	fsTimer.initializeMs( 10000 , delayedMount ).startOnce();
 
 }
 

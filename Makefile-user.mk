@@ -34,8 +34,8 @@ COM_SPEED	= 115200
 # SPI_MODE = dio
 
 ## SPIFFS options
-#DISABLE_SPIFFS = 1
-SPIFF_FILES = files
+DISABLE_SPIFFS = 1
+#SPIFF_FILES = files
 
 # If you use custom LWIP compilation make sure to enable espconn because libsmartconfig uses it 
 ENABLE_ESPCONN = 1
