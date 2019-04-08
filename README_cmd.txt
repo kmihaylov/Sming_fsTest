@@ -1,0 +1,1 @@
+/opt/esp-open-sdk/esptool/esptool.py -p /dev/ttyUSB0 -b 115200 write_flash -ff 40m -fm qio -fs 32m 0x00000 out/firmware/rboot.bin 0x02000 out/firmware/rom0.bin 0x100000 random.bin && python -m serial.tools.miniterm /dev/ttyUSB0 115200
